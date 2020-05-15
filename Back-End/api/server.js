@@ -35,7 +35,7 @@ server.use( '/puppeteer' , ( req , res ) => {
         // var url = 'https://www.indeed.com/jobs?q=(react+or+javascript)+title%3Adeveloper+-Senior+-Java+-PHP+-.NET+-sr+-ux+-Sr+-lead+-principal+-administrator+-ios+-manager+-automation+-webmaster+$50,000+-+$90,000&l=United+States&radius=0&explvl=entry_level&limit=50'
 
         var browser = await puppeteer.launch({
-            headless: false,
+            // headless: false,
         });
 
         var page = await browser.newPage();
@@ -159,10 +159,7 @@ server.use( '/puppeteer' , ( req , res ) => {
         });
 
         let info = [ indeedData , linkedInData ]
-        // let info = [ indeedData ]
-
         await browser.close();
-
         res.send( info )
 
 

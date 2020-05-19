@@ -20,8 +20,6 @@ server.use( cors() );
 // Router extensions
 server.use( '/jobs' , jobs );
 server.use( '/events' , calendar );
-
-// Puppeteer Indeed Suggestion Endpoint
 server.use( '/puppeteer' , puppeteerData );
 
 // Sanity Check

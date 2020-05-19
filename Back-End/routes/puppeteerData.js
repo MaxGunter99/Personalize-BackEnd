@@ -1,35 +1,128 @@
 const router = require('express').Router();
 const puppeteer = require('puppeteer');
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const customSearch = async ( details ) => {
+
+    const browser = await puppeteer.launch({
+        // headless: false,
+    });
+
+    const page = await browser.newPage();
+
+    let url = 'https://www.indeed.com/advanced_search?q=&l=Austin%2C+TX'
+
+    await page.goto( url , { waitUntil: 'networkidle2' });
+
+    // FORMATTED
+    // {
+    //     "WithAllOfTheseWords": "aaa"
+    //     "WithTheExactPhrase": "1+ years",
+    //     "WithAtLeastOneOfTheseWords": "React Javascript",
+    //     "WithNoneOfTheseWords": "C++ Java Sr Senior",
+    //     "WithTheseWordsInTitle": "developer",
+    //     "FromThisCompany": "Apple"
+    // }
+
+    // Input "With all of these words"
+    if ( details.WithAllOfTheseWords ) {
+        await page.focus( 'input[name="as_and"]' );
+        await page.keyboard.type( details.WithAllOfTheseWords )
+    }
+
+    // Input "With the exact phrase"
+    if ( details.WithTheExactPhrase ) {
+        await page.focus( 'input[name="as_phr"]' );
+        await page.keyboard.type( details.WithTheExactPhrase );
+    }
+
+    // Input "With at least one of these words"
+    if ( details.WithAtLeastOneOfTheseWords ) {
+        await page.focus( 'input[name="as_any"]' );
+        await page.keyboard.type( details.WithAtLeastOneOfTheseWords );
+    }
+
+    // Input "With none of these words"
+    if ( details.WithNoneOfTheseWords ) {
+        await page.focus( 'input[name="as_not"]' );
+        await page.keyboard.type( details.WithNoneOfTheseWords );
+    }
+
+    // Input "With these words in the title"
+    if ( details.WithTheseWordsInTitle ) {
+        await page.focus( 'input[name="as_ttl"]' );
+        await page.keyboard.type( details.WithTheseWordsInTitle );
+    }
+
+    // Input "From this company"
+    if ( details.FromThisCompany ) {
+        await page.focus( 'input[name="as_cmp"]' );
+        await page.keyboard.type( details.FromThisCompany );
+    }
+
+    // Submit search
+    await page.click( 'button[ value="Find Jobs" ]' )
+
+    const newURL = await page.url()
+    browser.close();
+    return newURL
+
+}
+
+
 router.get( '/' , async ( req , res ) => {
 
-    // INDEED
-    // var url = 'https://www.indeed.com/jobs?q=web+developer+-Senior+-Java+-PHP+-.NET+-sr+-Sr+-lead+-principal+-administrator+-ios+-manager+-ux+-automation+-webmaster+$50,000+-+$90,000&l=Bee+Cave,+TX&radius=50&explvl=entry_level&limit=50'
-    var url = 'https://www.indeed.com/jobs?as_and=Developer&as_phr=&as_any=&as_not=Senior+Java+PHP+.NET+sr+Sr+lead+principal+administrator+ios+manager+ux+automation+webmaster&as_ttl=&as_cmp=&jt=all&st=&sr=directhire&as_src=&salary=%2450%2C000+-+%2490%2C000&radius=50&l=Bee+Cave%2C+TX&fromage=any&limit=50&sort=date&psf=advsrch&from=advancedsearch'
+    if ( 
+        req.body.WithAllOfTheseWords ||
+        req.body.WithTheExactPhrase ||
+        req.body.WithAtLeastOneOfTheseWords ||
+        req.body.WithNoneOfTheseWords ||
+        req.body.WithTheseWordsInTitle ||
+        req.body.FromThisCompany
+    ) {
+        console.log( 'Args:' , req.body )
+        url = await customSearch( req.body )
 
-    // var url = 'https://www.indeed.com/jobs?q=developer+-Senior+-Java+-PHP+-.NET+-sr+-ux+-Sr+-lead+-principal+-administrator+-ios+-manager+-automation+-webmaster+$50,000+-+$90,000&l=Austin,+TX&radius=50&explvl=entry_level&limit=50'
+    } else {
+        console.log( 'Empty' )
+        url = 'https://www.indeed.com/jobs?as_and=Developer&as_phr=&as_any=&as_not=Senior+Java+PHP+.NET+sr+Sr+lead+principal+administrator+ios+manager+ux+automation+webmaster&as_ttl=&as_cmp=&jt=all&st=&sr=directhire&as_src=&salary=%2450%2C000+-+%2490%2C000&radius=50&l=Bee+Cave%2C+TX&fromage=any&limit=50&sort=date&psf=advsrch&from=advancedsearch'
+    }
+
+    console.log( 'Done! URL: ' , url )
+
+    // INDEED
+
+    // Entry level Web Developer ( Austin - All )
+    // var url =  'https://www.indeed.com/jobs?as_and=web+developer&as_phr=&as_any=&as_not=java&as_ttl=&as_cmp=&jt=all&st=&as_src=&salary=&radius=50&l=Austin%2C+TX&fromage=any&limit=10&sort=date&psf=advsrch&from=advancedsearch'
+
+    // Front End Developer ( Austin - All )
+    // const url = 'https://www.indeed.com/jobs?q=front+end+developer&l=Austin%2C+TX'
+
+    // Entry level Web Developer ( Austin - filters out senior level jobs )
+    // var url = 'https://www.indeed.com/jobs?as_and=Developer&as_phr=&as_any=&as_not=Senior+Java+PHP+.NET+sr+Sr+lead+principal+administrator+ios+manager+ux+automation+webmaster&as_ttl=&as_cmp=&jt=all&st=&sr=directhire&as_src=&salary=%2450%2C000+-+%2490%2C000&radius=50&l=Bee+Cave%2C+TX&fromage=any&limit=50&sort=date&psf=advsrch&from=advancedsearch'
 
     // Whole US
     // var url = 'https://www.indeed.com/jobs?q=(react+or+javascript)+title%3Adeveloper+-Senior+-Java+-PHP+-.NET+-sr+-ux+-Sr+-lead+-principal+-administrator+-ios+-manager+-automation+-webmaster+$50,000+-+$90,000&l=United+States&radius=0&explvl=entry_level&limit=50'
     // var url = 'https://www.indeed.com/jobs?as_and=&as_phr=&as_any=react+javascript+Junior+Jr&as_not=C%2B%2B+Angular+Senior+Java+PHP+.NET+sr+ux+Sr+lead+principal+administrator+ios+manager+automation+webmaster&as_ttl=developer&as_cmp=&jt=all&st=&sr=directhire&as_src=&salary=%2450%2C000+-+%2490%2C000&radius=0&l=United+States&fromage=any&limit=50&sort=date&psf=advsrch&from=advancedsearch'
     // var url = 'https://www.indeed.com/jobs?q=(react+or+javascript+or+Junior+or+Jr+or+Full-Stack+or+Front-End)+title%3Adeveloper+-C%2B%2B+-Angular+-Senior+-Java+-PHP+-.NET+-sr+-ux+-Sr+-lead+-principal+-administrator+-ios+-manager+-automation+-webmaster+$50,000+-+$90,000&l=United+States&radius=0&explvl=entry_level&sort=date&limit=50&sr=directhire'
 
-    var browser = await puppeteer.launch({
-        headless: false,
+    const browser = await puppeteer.launch({
+        // headless: false,
     });
 
-    var page = await browser.newPage();
+    const page = await browser.newPage();
 
     await page.goto( url , { waitUntil: 'networkidle2' });
 
     let indeedData = async ( finalData = [] ) => {
 
-        console.log('start')
+        const PagesData = [];
+        let max = 1;
 
-        const PagesData = []
-        let max = 1
-
-        for ( var x = 0; x < max; x++ ) {
+        for ( let x = 0; x < max; x++ ) {
 
             const loop = await page.evaluate( () => {
 
@@ -45,30 +138,30 @@ router.get( '/' , async ( req , res ) => {
                     data.push( [ e.innerText, e.firstElementChild.href ] )
                 }
 
-                for ( let i of summary ) {
-                    data[ index ].push( i.innerText )
+                for ( let s of summary ) {
+                    data[ index ].push( s.innerText )
                     index += 1
                 }
 
                 index = 0
 
-                for ( let x of company ) {
-                    data[ index ].push( x.innerText )
+                for ( let c of company ) {
+                    data[ index ].push( c.innerText )
                     index += 1
                 }
 
                 index = 0
 
-                for ( let y of location ) {
-                    data[ index ].push( y.innerText )
+                for ( let l of location ) {
+                    data[ index ].push( l.innerText )
                     index += 1
                 }
 
-                for ( var x = 0; x < data.length; x++ ) {
+                for ( let jobData = 0; jobData < data.length; jobData++ ) {
 
-                    let current = data[x];
+                    let current = data[ jobData ];
                     let currentFormatted = { 
-                        id: x, 
+                        id: jobData, 
                         title: current[0], 
                         URL: current[1], 
                         description: current[2], 
@@ -77,31 +170,34 @@ router.get( '/' , async ( req , res ) => {
                         jobBoard: 'Indeed' 
                     }
 
-                    puppeteerData.push( currentFormatted )
+                    puppeteerData.push( currentFormatted );
 
                 }
 
-                return puppeteerData
+                return puppeteerData;
 
             });
 
-            for ( var item of loop ) {
-                finalData.push( item )
-                PagesData.push( item )
-            }
+            for ( let item of loop ) {
+                finalData.push( item );
+                PagesData.push( item );
+
+            };
 
             try {
-                await page.click( 'path[d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"]' )
+                await page.click( 'path[d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"]' );
                 max += 1
+
             } catch {
                 console.log( 'No more pages' )
-            }
 
-            await page.goto( page.url() )
+            };
 
-        }
+            await page.goto( page.url() );
 
-        return finalData
+        };
+
+        return finalData;
 
     };
 
@@ -179,7 +275,7 @@ router.get( '/' , async ( req , res ) => {
     let info = [ await indeedData() ]
     // let info = [ linkedInData ]
     browser.close();
-    res.send(info)
+    res.send( info )
 
 });
 

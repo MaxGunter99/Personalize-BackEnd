@@ -1,9 +1,6 @@
+
 const router = require('express').Router();
 const puppeteer = require('puppeteer');
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 router.get( '/' , async ( req , res ) => {
@@ -196,7 +193,7 @@ router.get( '/' , async ( req , res ) => {
     // let info = [ indeedData , linkedInData ]
     let info = [ await indeedData() ]
     // let info = [ linkedInData ]
-    browser.close();
+    await browser.close();
     res.send( info )
 
 });
@@ -231,11 +228,15 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithAllOfTheseWords )
     }
 
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Input "With the exact phrase"
     if ( details.WithTheExactPhrase ) {
         await page.focus( 'input[name="as_phr"]' );
         await page.keyboard.type( details.WithTheExactPhrase );
     }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Input "With at least one of these words"
     if ( details.WithAtLeastOneOfTheseWords ) {
@@ -243,11 +244,15 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithAtLeastOneOfTheseWords );
     }
 
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Input "With none of these words"
     if ( details.WithNoneOfTheseWords ) {
         await page.focus( 'input[name="as_not"]' );
         await page.keyboard.type( details.WithNoneOfTheseWords );
     }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Input "With these words in the title"
     if ( details.WithTheseWordsInTitle ) {
@@ -255,37 +260,40 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithTheseWordsInTitle );
     }
 
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Input "From this company"
     if ( details.FromThisCompany ) {
         await page.focus( 'input[name="as_cmp"]' );
         await page.keyboard.type( details.FromThisCompany );
     }
 
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Submit search
     await page.click( 'button[ value="Find Jobs" ]' )
 
     const newURL = await page.url()
-    browser.close();
+    await browser.close();
     return newURL
 
 }
 
+// INDEED WITH PARAMS
 router.post( '/' , async ( req , res ) => {
-
 
     url = await customSearch( req.body )
 
-    console.log( 'Done! URL: ' , url )
-
-    // INDEED
-
     const browser = await puppeteer.launch({
         // headless: false,
+        args: ['--disable-infobars'],
     });
 
     const page = await browser.newPage();
 
     await page.goto( url , { waitUntil: 'networkidle2' });
+
+    await page.setViewport({ width: 1000, height: 1000 });
 
     let indeedData = async ( finalData = [] ) => {
 
@@ -370,12 +378,14 @@ router.post( '/' , async ( req , res ) => {
 
         };
 
+        console.log( finalData )
+
         return finalData;
 
     };
 
     let info = [ await indeedData() ]
-    browser.close();
+    await browser.close();
     res.send( info )
 
 });

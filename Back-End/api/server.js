@@ -10,6 +10,7 @@ const cors = require( 'cors' );
 const jobs = require( '../routes/jobsRouter' );
 const calendar = require( '../routes/calendarRouter' );
 const puppeteerData = require( '../routes/puppeteerData' );
+const weather = require( '../routes/weatherScraper' );
 
 // Apply Middleware
 server.use( express.json() );
@@ -21,6 +22,7 @@ server.use( cors() );
 server.use( '/jobs' , jobs );
 server.use( '/events' , calendar );
 server.use( '/puppeteer' , puppeteerData );
+server.use( '/weather' , weather );
 
 // Sanity Check
 server.use( '/' , ( req , res ) => {

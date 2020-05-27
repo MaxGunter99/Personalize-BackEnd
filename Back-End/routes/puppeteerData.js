@@ -122,76 +122,78 @@ router.get( '/' , async ( req , res ) => {
 
 
 
-    // // LINKEDIN
-    // // let url2 = 'https://www.linkedin.com/jobs/search/?distance=25&f_E=2&f_PP=104472865&geoId=104472865&keywords=web%20developer&location=Austin%2C%20Texas%2C%20United%20States'
-    // let url2 = 'https://www.linkedin.com/jobs/search/?distance=25&f_E=2&f_TPR=r604800&geoId=104472865&keywords=full%20stack%20developer&location=Austin%2C%20Texas%2C%20United%20States&sortBy=DD'
+    // LINKEDIN
+    // let url2 = 'https://www.linkedin.com/jobs/search/?distance=25&f_E=2&f_PP=104472865&geoId=104472865&keywords=web%20developer&location=Austin%2C%20Texas%2C%20United%20States'
+    let url2 = 'https://www.linkedin.com/jobs/search/?distance=25&f_E=2&f_TPR=r604800&geoId=104472865&keywords=full%20stack%20developer&location=Austin%2C%20Texas%2C%20United%20States&sortBy=DD'
 
-    // // await page.goto( url2 , { waitUntil: 'networkidle2' });
-    // let linkedInData = await page.evaluate(async () => {
+    await page.goto( url2 , { waitUntil: 'networkidle2' });
 
-    //     let data = [];
-    //     let LinkedInData = [];
-    //     let title = document.querySelectorAll('h3[class="result-card__title job-result-card__title"]');
-    //     let company = document.querySelectorAll('a[class="result-card__subtitle-link job-result-card__subtitle-link"]')
-    //     let summary = document.querySelectorAll('p[class="job-result-card__snippet"]')
-    //     let location = document.querySelectorAll('span[class="job-result-card__location"]')
-    //     let URL = document.querySelectorAll('a[class="result-card__full-card-link"]')
+    // await page.goto( url2 , { waitUntil: 'networkidle2' });
+    let linkedInData = await page.evaluate( async () => {
+
+        let data = [];
+        let LinkedInData = [];
+        let title = document.querySelectorAll('h3[class="result-card__title job-result-card__title"]');
+        let company = document.querySelectorAll('a[class="result-card__subtitle-link job-result-card__subtitle-link"]')
+        let summary = document.querySelectorAll('p[class="job-result-card__snippet"]')
+        let location = document.querySelectorAll('span[class="job-result-card__location"]')
+        let URL = document.querySelectorAll('a[class="result-card__full-card-link"]')
 
 
-    //     let index = 0;
+        let index = 0;
 
-    //     for (let t of title) {
-    //         data.push([{ title: t.innerText }])
+        for (let t of title) {
+            data.push([{ title: t.innerText }])
 
-    //     }
+        }
 
-    //     index = 0
+        index = 0
 
-    //     for (let u of URL) {
-    //         data[index][0]['URL'] = u.href
-    //         index += 1
-    //     }
+        for (let u of URL) {
+            data[index][0]['URL'] = u.href
+            index += 1
+        }
 
-    //     index = 0
+        index = 0
 
-    //     for (let c of company) {
-    //         data[index][0]['company'] = c.innerText
-    //         index += 1
-    //     }
+        for (let c of company) {
+            data[index][0]['company'] = c.innerText
+            index += 1
+        }
 
-    //     index = 0
+        index = 0
 
-    //     for (let s of summary) {
-    //         data[index][0]['jobBoard'] = 'LinkedIn'
-    //         index += 1
-    //     }
+        for (let s of summary) {
+            data[index][0]['jobBoard'] = 'LinkedIn'
+            index += 1
+        }
 
-    //     index = 0
+        index = 0
 
-    //     for (let l of location) {
-    //         data[index][0]['location'] = l.innerText
-    //         index += 1
-    //     }
+        for (let l of location) {
+            data[index][0]['location'] = l.innerText
+            index += 1
+        }
 
-    //     index = 0
+        index = 0
 
-    //     for (let s of summary) {
-    //         data[index][0]['description'] = s.innerTextdata
-    //         data[index][0]['id'] = index
-    //         index += 1
-    //     }
+        for (let s of summary) {
+            data[index][0]['description'] = s.innerTextdata
+            data[index][0]['id'] = index
+            index += 1
+        }
 
-    //     for (var x = 0; x < data.length; x++) {
-    //         let current = data[x]
-    //         LinkedInData.push(current[0])
-    //     }
+        for (var x = 0; x < data.length; x++) {
+            let current = data[x]
+            LinkedInData.push(current[0])
+        }
 
-    //     return LinkedInData
+        return LinkedInData
 
-    // });
+    });
 
-    // let info = [ indeedData , linkedInData ]
-    let info = [ await indeedData() ]
+    let info = [ await indeedData() , await linkedInData() ]
+    // let info = [ await indeedData() ]
     // let info = [ linkedInData ]
     await browser.close();
     res.send( info )
@@ -208,7 +210,7 @@ const customSearch = async ( details ) => {
 
     const page = await browser.newPage();
 
-    let url = 'https://www.indeed.com/advanced_search?q=&l=Austin%2C+TX'
+    let url = 'https://www.indeed.com/advanced_search?'
 
     await page.goto( url , { waitUntil: 'networkidle2' });
 
@@ -228,7 +230,7 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithAllOfTheseWords )
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Input "With the exact phrase"
     if ( details.WithTheExactPhrase ) {
@@ -236,7 +238,7 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithTheExactPhrase );
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Input "With at least one of these words"
     if ( details.WithAtLeastOneOfTheseWords ) {
@@ -244,7 +246,7 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithAtLeastOneOfTheseWords );
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Input "With none of these words"
     if ( details.WithNoneOfTheseWords ) {
@@ -252,7 +254,7 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithNoneOfTheseWords );
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Input "With these words in the title"
     if ( details.WithTheseWordsInTitle ) {
@@ -260,7 +262,7 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.WithTheseWordsInTitle );
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Input "From this company"
     if ( details.FromThisCompany ) {
@@ -268,7 +270,23 @@ const customSearch = async ( details ) => {
         await page.keyboard.type( details.FromThisCompany );
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Input "SalaryEstimate"
+    if ( details.SalaryEstimate ) {
+        await page.focus( 'input[id="salary"]' );
+        await page.keyboard.type( details.SalaryEstimate );
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Input "Location"
+    if ( details.Location ) {
+        await page.focus( 'input[id="where"]' );
+        await page.keyboard.type( details.Location );
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     // Submit search
     await page.click( 'button[ value="Find Jobs" ]' )
@@ -291,9 +309,16 @@ router.post( '/' , async ( req , res ) => {
 
     const page = await browser.newPage();
 
+    console.log( url )
+
     await page.goto( url , { waitUntil: 'networkidle2' });
 
-    await page.setViewport({ width: 1000, height: 1000 });
+    try {
+        await page.click( 'span[class="no-wrap"] a' )
+        await page.reload()
+    } catch {
+        console.log( 'No sort by date button not found' )
+    }
 
     let indeedData = async ( finalData = [] ) => {
 
@@ -378,15 +403,21 @@ router.post( '/' , async ( req , res ) => {
 
         };
 
-        console.log( finalData )
-
         return finalData;
 
-    };
+    }
 
     let info = [ await indeedData() ]
+    console.log( info[0].length )
     await browser.close();
-    res.send( info )
+
+    try {
+
+        res.send( info )
+
+    } catch (error) {
+        res.status( 500 ).send({ message: 'Server Error getting events!', error })
+    }
 
 });
 

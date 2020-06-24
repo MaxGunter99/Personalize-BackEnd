@@ -28,7 +28,7 @@ router.get( '/' , async ( req , res ) => {
     // var url = 'https://www.indeed.com/jobs?q=(react+or+javascript+or+Junior+or+Jr+or+Full-Stack+or+Front-End)+title%3Adeveloper+-C%2B%2B+-Angular+-Senior+-Java+-PHP+-.NET+-sr+-ux+-Sr+-lead+-principal+-administrator+-ios+-manager+-automation+-webmaster+$50,000+-+$90,000&l=United+States&radius=0&explvl=entry_level&sort=date&limit=50&sr=directhire'
 
     const browser = await puppeteer.launch({
-        // headless: false,
+        headless: false,
     });
 
     const page = await browser.newPage();

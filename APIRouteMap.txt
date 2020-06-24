@@ -1,0 +1,28 @@
+ROUTES INFORMATION
+
+• "/" ⬇︎
+
+    • Method: GET
+        • Returns: "Your Good"
+
+• "/jobs" ⬇︎
+
+    • Method: GET
+        • Returns: All jobs from database
+
+• "/jobs/:id" ⬇︎
+
+    • Method: GET
+        • Returns: All job data linked to the job ID
+    • Method: PUT
+        • Returns: Updates job data based on the information you give to it
+    • Method: DELETE
+        • Returns: Deletes entry of the job ID
+
+• "/puppeteer" ⬇︎
+    • Methods: GET
+        • Returns: Jobs posted on indeed using the parameters you send to it
+
+• "/weather" ⬇︎
+    • Methods: GET
+        • Returns: Returns Google weather data from your local area
